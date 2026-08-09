@@ -1,0 +1,27 @@
+{
+  "name": "gt-r-racing",
+  "version": "2.0.0",
+  "private": true,
+  "description": "GT-R Racing — bird's-eye arcade racer. Next.js front end over a Three.js engine.",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "export": "STATIC_EXPORT=1 next build",
+    "lint": "next lint",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "next": "16.3.0",
+    "react": "19.2.8",
+    "react-dom": "19.2.8",
+    "three": "0.170.0"
+  },
+  "devDependencies": {
+    "@types/node": "26.2.0",
+    "@types/react": "19.2.18",
+    "@types/react-dom": "19.2.4",
+    "@types/three": "0.170.0",
+    "typescript": "5.9.3"
+  }
+}

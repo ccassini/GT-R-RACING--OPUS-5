@@ -1,0 +1,432 @@
+/* ═══════════════════════════════════════════════════════
+   HUD — race instrumentation
+
+   Anchored to the four corners because the bird's-eye camera
+   keeps the action dead centre. Everything is text-first with a
+   dark halo rather than boxed panels, so the circuit stays
+   readable underneath.
+   ═══════════════════════════════════════════════════════ */
+
+.hud {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  font-family: var(--font-numeric);
+  /* Absolutely positioned children resolve against the padding box, so
+     the safe margin has to be an offset rather than padding. */
+  --pad: clamp(0.8rem, 0.4rem + 1.4vw, 1.9rem);
+  --halo: 0 2px 14px oklch(0% 0 0 / 0.85), 0 0 3px oklch(0% 0 0 / 0.7);
+}
+
+.hud[hidden] { display: none; }
+
+.hud__label {
+  font-size: var(--text-label);
+  font-weight: 600;
+  letter-spacing: var(--track-label);
+  text-transform: uppercase;
+  color: color-mix(in oklab, var(--paper) 68%, transparent);
+  text-shadow: var(--halo);
+}
+
+/* ── Corners ──────────────────────────────────────────── */
+
+.hud__topleft { position: absolute; top: var(--pad); left: var(--pad); }
+.hud__topright { position: absolute; top: var(--pad); right: var(--pad); text-align: right; }
+.hud__topcenter { position: absolute; top: var(--pad); left: 50%; transform: translateX(-50%); }
+/* Dial on the left, with the two gauges stacked beside it rather
+   than in a separate corner. */
+.hud__bottomleft {
+  position: absolute;
+  bottom: var(--pad);
+  left: var(--pad);
+  display: flex;
+  align-items: flex-end;
+  gap: var(--gap-sm);
+}
+
+.hud__bottomright {
+  position: absolute;
+  bottom: var(--pad);
+  right: var(--pad);
+  display: grid;
+  gap: var(--gap-sm);
+  justify-items: end;
+}
+
+/* ── Position ─────────────────────────────────────────── */
+
+.pos { display: flex; align-items: baseline; gap: 0.15em; line-height: 0.8; }
+
+.pos__value {
+  font-family: var(--font-display);
+  font-size: clamp(3rem, 1.6rem + 5vw, 6rem);
+  color: var(--paper);
+  text-shadow: var(--halo);
+  transition: color var(--dur-base) var(--ease-out);
+}
+
+.pos__value.is-lead { color: var(--gold); }
+
+.pos__total {
+  font-size: clamp(1rem, 0.7rem + 1vw, 1.5rem);
+  font-weight: 700;
+  color: color-mix(in oklab, var(--paper) 55%, transparent);
+  text-shadow: var(--halo);
+}
+
+/* ── Lap + timing ─────────────────────────────────────── */
+
+.lap {
+  font-family: var(--font-display);
+  font-size: clamp(1.7rem, 1rem + 2.4vw, 3rem);
+  line-height: 0.9;
+  color: var(--paper);
+  text-shadow: var(--halo);
+}
+
+.lap span { font-size: 0.5em; color: color-mix(in oklab, var(--paper) 55%, transparent); }
+
+.timing { display: grid; gap: 1px; margin-top: var(--gap-xs); }
+
+.timing > div {
+  display: grid;
+  grid-template-columns: auto minmax(7.5ch, auto);
+  gap: var(--gap-xs);
+  align-items: baseline;
+  justify-content: end;
+}
+
+.timing dt {
+  font-size: var(--text-label);
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  color: color-mix(in oklab, var(--paper) 55%, transparent);
+  text-shadow: var(--halo);
+}
+
+.timing dd {
+  font-size: 1.05rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  color: var(--paper);
+  text-shadow: var(--halo);
+}
+
+.timing dd.is-best { color: var(--mint); }
+.timing dd.is-losing { color: var(--coral); }
+
+/* ── Minimap ──────────────────────────────────────────── */
+
+.minimap {
+  width: clamp(120px, 13vw, 180px);
+  height: auto;
+  display: block;
+  opacity: 0.92;
+  filter: drop-shadow(0 3px 10px oklch(0% 0 0 / 0.6));
+}
+
+.minimap[hidden] { display: none; }
+
+/* ── Standings tower ──────────────────────────────────── */
+
+/* Placed by .hud__topright, not by itself. Absolute positioning here
+   anchors to whichever corner box it happens to sit in. */
+.tower {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 2px;
+  min-width: 152px;
+}
+
+.towerrow {
+  display: grid;
+  grid-template-columns: 1.3rem 4px 1fr auto;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.18rem 0.4rem;
+  background: color-mix(in oklab, var(--ink-deep) 55%, transparent);
+  border-left: 2px solid transparent;
+  transition: background-color var(--dur-fast) var(--ease-out);
+}
+
+.towerrow.is-player {
+  background: color-mix(in oklab, var(--coral) 34%, var(--ink-deep));
+  border-left-color: var(--coral);
+}
+
+.towerrow__pos {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: color-mix(in oklab, var(--paper) 62%, transparent);
+}
+
+.towerrow__chip { width: 4px; height: 14px; }
+
+.towerrow__name {
+  font-size: 0.76rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--paper);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.towerrow__gap {
+  font-size: 0.7rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: color-mix(in oklab, var(--paper) 62%, transparent);
+}
+
+/* ── Instruments ──────────────────────────────────────── */
+
+/* Two dials, matched: rev counter first and larger because it is the
+   one a driver acts on, road speed beside it. Bottom-left, near the
+   car, out of the racing line and away from the standings. */
+.tacho {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: clamp(6.5rem, 4.2rem + 7.6vw, 10.5rem);
+  aspect-ratio: 1;
+}
+
+.tacho__dial {
+  width: 100%;
+  height: 100%;
+  display: block;
+  filter: drop-shadow(0 6px 22px oklch(0% 0 0 / 0.75));
+}
+
+.tacho__unit {
+  position: absolute;
+  top: 76%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 0.52rem;
+  font-weight: 700;
+  letter-spacing: var(--track-label);
+  color: var(--paper-mute);
+  text-shadow: var(--halo);
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+.speedo {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: clamp(9rem, 6rem + 11vw, 15rem);
+  aspect-ratio: 1;
+}
+
+.speedo__dial {
+  width: 100%;
+  height: 100%;
+  display: block;
+  filter: drop-shadow(0 6px 22px oklch(0% 0 0 / 0.75));
+}
+
+/* Digits inside the face: the scale gives the sense of speed, the
+   number gives the value, and neither has to be read twice. */
+.speedo__readout {
+  position: absolute;
+  top: 56%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: grid;
+  justify-items: center;
+  gap: 0;
+  pointer-events: none;
+}
+
+.speedo__value {
+  font-family: var(--font-display);
+  font-size: clamp(1.9rem, 1rem + 2.6vw, 3.1rem);
+  line-height: 0.86;
+  color: var(--paper);
+  text-shadow: var(--halo);
+  font-variant-numeric: tabular-nums;
+  transition: color var(--dur-fast) var(--ease-out);
+}
+
+.speedo__value.is-redline { color: var(--coral); }
+
+/* In the gap at the bottom of the scale — the one part of a dial face
+   with no graduations on it, which is where real clusters put it. */
+.speedo__gear {
+  position: absolute;
+  top: 79%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-family: var(--font-display);
+  font-size: clamp(1.4rem, 0.9rem + 1.7vw, 2.2rem);
+  line-height: 1;
+  color: var(--amber);
+  text-shadow: var(--halo);
+  pointer-events: none;
+  transition: color var(--dur-fast) var(--ease-out);
+}
+
+.speedo.is-redline .speedo__gear { color: var(--coral); }
+
+.speedo__unit {
+  font-size: 0.58rem;
+  font-weight: 700;
+  letter-spacing: var(--track-label);
+  color: var(--paper-mute);
+  text-shadow: var(--halo);
+}
+
+/* ── Nitro + drift ────────────────────────────────────── */
+
+.gauges {
+  display: grid;
+  gap: var(--gap-xs);
+  padding-bottom: 0.6rem;
+}
+
+.boost { display: grid; gap: 4px; justify-items: start; }
+
+.boost__track {
+  display: block;
+  width: clamp(7rem, 11vw, 11rem);
+  height: 7px;
+  background: color-mix(in oklab, var(--paper) 14%, transparent);
+  border: 1px solid color-mix(in oklab, var(--paper) 20%, transparent);
+  overflow: hidden;
+}
+
+.boost__fill {
+  display: block;
+  height: 100%;
+  width: 100%;
+  transform-origin: left center;
+  transform: scaleX(0);
+  background: var(--steel);
+  transition: background-color var(--dur-fast) var(--ease-out);
+}
+
+.boost.is-ready .boost__track { border-color: var(--mint); }
+.boost.is-ready .boost__fill { background: var(--mint); }
+.boost.is-firing .boost__fill {
+  background: linear-gradient(90deg, var(--coral), var(--amber));
+}
+
+.drift { display: grid; gap: 1px; justify-items: start; }
+
+.drift__score {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--paper);
+  text-shadow: var(--halo);
+  font-variant-numeric: tabular-nums;
+  transition: color var(--dur-fast) var(--ease-out);
+}
+
+.drift.is-active .drift__score { color: var(--amber); }
+
+.drift__combo {
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  color: var(--amber);
+  text-shadow: var(--halo);
+  min-height: 1em;
+}
+
+/* ── Centre messages ──────────────────────────────────── */
+
+.hud__center {
+  position: absolute;
+  left: 50%;
+  top: 38%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  display: grid;
+  gap: 0.2rem;
+  width: max-content;
+  max-width: 90vw;
+}
+
+.bigmsg {
+  font-family: var(--font-display);
+  font-size: clamp(2.4rem, 1.2rem + 6vw, 7rem);
+  line-height: 0.86;
+  letter-spacing: -0.01em;
+  text-transform: uppercase;
+  color: var(--paper);
+  text-shadow: 0 4px 30px oklch(0% 0 0 / 0.9), 0 0 60px color-mix(in oklab, var(--amber) 55%, transparent);
+  opacity: 0;
+  transform: scale(0.94);
+  transition: opacity var(--dur-base) var(--ease-out), transform var(--dur-base) var(--ease-out);
+}
+
+.bigmsg.is-shown { opacity: 1; transform: scale(1); }
+.bigmsg.is-good { color: var(--mint); }
+.bigmsg.is-hot { color: var(--coral); }
+
+.submsg {
+  font-size: 0.9rem;
+  font-weight: 700;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--amber);
+  text-shadow: var(--halo);
+  opacity: 0;
+  transition: opacity var(--dur-base) var(--ease-out);
+}
+
+.submsg.is-shown { opacity: 1; }
+
+/* ── Warnings & camera badge ──────────────────────────── */
+
+.hud__warning {
+  position: absolute;
+  left: 50%;
+  top: 24%;
+  transform: translateX(-50%);
+  font-size: clamp(1.1rem, 0.8rem + 1.4vw, 1.8rem);
+  font-weight: 700;
+  letter-spacing: 0.3em;
+  color: var(--coral);
+  text-shadow: var(--halo);
+  animation: warnPulse 0.6s steps(2, jump-none) infinite;
+}
+
+.hud__warning[hidden] { display: none; }
+
+@keyframes warnPulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.15; }
+}
+
+.hud__camera {
+  position: absolute;
+  right: var(--pad);
+  top: 50%;
+  transform: translateY(-0.5em);
+  font-size: var(--text-label);
+  font-weight: 700;
+  letter-spacing: 0.24em;
+  color: color-mix(in oklab, var(--paper) 45%, transparent);
+  text-shadow: var(--halo);
+}
+
+/* ── Small screens ────────────────────────────────────── */
+
+@media (max-width: 720px) {
+  .tower { display: none; }
+  .tacho { display: none; }
+  .timing > div:nth-child(3) { display: none; }
+}
+
+@media (max-height: 560px) {
+  .hud__topcenter { display: none; }
+}

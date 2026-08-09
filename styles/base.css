@@ -1,0 +1,454 @@
+/* ═══════════════════════════════════════════════════════
+   BASE — reset, canvas, screen stack, shared primitives
+   ═══════════════════════════════════════════════════════ */
+
+*,
+*::before,
+*::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: var(--ink-deep);
+  color: var(--paper);
+  font-family: var(--font-ui);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  overscroll-behavior: none;
+}
+
+#scene {
+  position: fixed;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.app {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+}
+
+/* ── Screen stack ─────────────────────────────────────── */
+
+.screen {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition:
+    opacity var(--dur-base) var(--ease-out),
+    visibility 0s linear var(--dur-base);
+}
+
+.screen.is-active {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transition:
+    opacity var(--dur-base) var(--ease-out),
+    visibility 0s;
+}
+
+.screen > * {
+  transform: translate3d(0, 14px, 0);
+  opacity: 0;
+  transition:
+    transform var(--dur-slow) var(--ease-out),
+    opacity var(--dur-slow) var(--ease-out);
+}
+
+.screen.is-active > * {
+  transform: translate3d(0, 0, 0);
+  opacity: 1;
+}
+
+/* ── Type primitives ──────────────────────────────────── */
+
+.eyebrow {
+  font-family: var(--font-numeric);
+  font-size: var(--text-label);
+  font-weight: 600;
+  letter-spacing: var(--track-label);
+  text-transform: uppercase;
+  color: var(--paper-mute);
+}
+
+.display {
+  font-family: var(--font-display);
+  font-weight: 400;
+  line-height: 0.86;
+  letter-spacing: var(--track-tight);
+  text-transform: uppercase;
+}
+
+.display--xl { font-size: var(--text-xl); }
+.display--lg { font-size: var(--text-lg); }
+
+.numeric {
+  font-family: var(--font-numeric);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.01em;
+}
+
+.numeric--lg { font-size: var(--text-lg); }
+
+.tagline {
+  font-family: var(--font-numeric);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--amber);
+}
+
+.blurb {
+  font-size: var(--text-sm);
+  line-height: 1.55;
+  color: var(--paper-dim);
+  max-width: 42ch;
+}
+
+.hint {
+  font-size: 0.78rem;
+  line-height: 1.5;
+  color: var(--paper-mute);
+  max-width: 40ch;
+}
+
+kbd {
+  font-family: var(--font-numeric);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  padding: 0.15em 0.45em;
+  border: 1px solid var(--panel-edge);
+  border-bottom-width: 2px;
+  color: var(--paper);
+  background: color-mix(in oklab, var(--ink-raise) 70%, transparent);
+}
+
+/* ── Buttons ──────────────────────────────────────────── */
+
+.btn {
+  position: relative;
+  font-family: var(--font-numeric);
+  font-size: 0.94rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--paper);
+  background: color-mix(in oklab, var(--ink-raise) 88%, transparent);
+  border: var(--hair);
+  padding: 0.85em 1.7em;
+  cursor: pointer;
+  overflow: hidden;
+  transition:
+    color var(--dur-fast) var(--ease-out),
+    border-color var(--dur-fast) var(--ease-out),
+    transform var(--dur-fast) var(--ease-out);
+}
+
+/* A stripe that wipes across on hover — the one shared motion motif. */
+.btn::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--paper);
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform var(--dur-base) var(--ease-out);
+  z-index: -1;
+}
+
+.btn > * { position: relative; }
+
+.btn:hover,
+.btn:focus-visible {
+  color: var(--ink);
+  border-color: var(--paper);
+}
+
+.btn:hover::before,
+.btn:focus-visible::before { transform: scaleX(1); }
+
+.btn:active { transform: translate3d(0, 1px, 0); }
+
+.btn--primary {
+  color: var(--ink);
+  background: var(--amber);
+  border-color: var(--amber);
+}
+
+.btn--primary::before { background: var(--paper); }
+
+.btn--ghost {
+  background: transparent;
+  color: var(--paper-mute);
+}
+
+.btn--block { width: 100%; }
+
+.backlink {
+  font-family: var(--font-numeric);
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: var(--track-label);
+  text-transform: uppercase;
+  color: var(--paper-mute);
+  background: none;
+  border: 0;
+  padding: 0.4em 0;
+  cursor: pointer;
+  transition: color var(--dur-fast) var(--ease-out), transform var(--dur-fast) var(--ease-out);
+}
+
+.backlink:hover,
+.backlink:focus-visible {
+  color: var(--amber);
+  transform: translate3d(-3px, 0, 0);
+}
+
+:focus-visible {
+  outline: 2px solid var(--amber);
+  outline-offset: 3px;
+}
+
+/* ── Scrollbars ───────────────────────────────────────── */
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--ink-line) transparent;
+}
+
+*::-webkit-scrollbar { width: 6px; height: 6px; }
+*::-webkit-scrollbar-track { background: transparent; }
+*::-webkit-scrollbar-thumb { background: var(--ink-line); }
+*::-webkit-scrollbar-thumb:hover { background: var(--steel); }
+
+/* ── Chips (radio-style option groups) ────────────────── */
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--gap-xs);
+}
+
+.chips--stack { flex-direction: column; align-items: stretch; }
+
+.chip {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  text-align: left;
+  font-family: var(--font-numeric);
+  font-size: 0.86rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--paper-dim);
+  background: color-mix(in oklab, var(--ink-raise) 72%, transparent);
+  border: var(--hair);
+  border-left: 3px solid transparent;
+  padding: 0.6em 1.1em;
+  cursor: pointer;
+  transition:
+    color var(--dur-fast) var(--ease-out),
+    border-color var(--dur-fast) var(--ease-out),
+    background-color var(--dur-fast) var(--ease-out),
+    transform var(--dur-fast) var(--ease-out);
+}
+
+.chip__hint,
+.chip small {
+  font-family: var(--font-ui);
+  font-size: 0.7rem;
+  font-weight: 400;
+  letter-spacing: 0.01em;
+  text-transform: none;
+  color: var(--paper-mute);
+}
+
+.chip:hover { color: var(--paper); transform: translate3d(2px, 0, 0); }
+
+/* Chips are toggle buttons, so aria-pressed is the state that matters.
+   Keying only off .is-selected left every chip looking identical to a
+   sighted user while screen readers announced the right one. */
+.chip.is-selected,
+.chip[aria-pressed='true'] {
+  color: var(--ink);
+  background: var(--amber);
+  border-color: var(--amber);
+  border-left-color: var(--ink);
+}
+
+.chip.is-selected .chip__hint,
+.chip.is-selected small,
+.chip[aria-pressed='true'] .chip__hint,
+.chip[aria-pressed='true'] small { color: color-mix(in oklab, var(--ink) 75%, transparent); }
+
+/* Segmented control — equal columns in one track */
+.chips--segment {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0;
+  border: var(--hair);
+  background: color-mix(in oklab, var(--ink-deep) 55%, transparent);
+  overflow: hidden;
+}
+
+.chip--segment {
+  align-items: center;
+  text-align: center;
+  gap: 0.15rem;
+  border: 0;
+  border-left: 1px solid var(--panel-edge);
+  border-radius: 0;
+  background: transparent;
+  padding: 0.72em 0.55em 0.68em;
+  min-width: 0;
+}
+
+.chip--segment:first-child { border-left: 0; }
+
+.chip--segment:hover { transform: none; color: var(--paper); background: color-mix(in oklab, var(--paper) 6%, transparent); }
+
+.chip--segment .chip__label {
+  display: block;
+  line-height: 1;
+}
+
+.chip--segment .chip__hint {
+  display: block;
+  font-family: var(--font-numeric);
+  font-size: 0.58rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--paper-mute);
+}
+
+.chip--segment.is-selected,
+.chip--segment[aria-pressed='true'] {
+  color: var(--ink);
+  background: var(--amber);
+  border-color: transparent;
+  border-left-color: transparent;
+}
+
+.chip--segment.is-selected .chip__hint,
+.chip--segment[aria-pressed='true'] .chip__hint {
+  color: color-mix(in oklab, var(--ink) 68%, transparent);
+}
+
+/* ── Sliders & toggles ────────────────────────────────── */
+
+.slider {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: var(--gap-xs) var(--gap-sm);
+  margin-bottom: var(--gap-sm);
+}
+
+.slider > .eyebrow { grid-column: 1 / -1; }
+
+.slider input[type="range"] {
+  appearance: none;
+  width: 100%;
+  height: 3px;
+  background: var(--ink-line);
+  cursor: pointer;
+}
+
+.slider input[type="range"]::-webkit-slider-thumb {
+  appearance: none;
+  width: 14px;
+  height: 20px;
+  background: var(--amber);
+  border: 0;
+  cursor: pointer;
+}
+
+.slider input[type="range"]::-moz-range-thumb {
+  width: 14px;
+  height: 20px;
+  border: 0;
+  border-radius: 0;
+  background: var(--amber);
+  cursor: pointer;
+}
+
+.slider output {
+  font-family: var(--font-numeric);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--amber);
+  min-width: 3ch;
+  text-align: right;
+}
+
+.toggle {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: start;
+  gap: var(--gap-xs) 0.7rem;
+  font-family: var(--font-numeric);
+  font-size: 0.86rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--paper-dim);
+  cursor: pointer;
+  padding: 0.35em 0;
+}
+
+.toggle__text {
+  display: grid;
+  gap: 0.2rem;
+  min-width: 0;
+}
+
+.toggle__label {
+  line-height: 1.2;
+  padding-top: 0.12em;
+}
+
+.toggle__hint {
+  max-width: none;
+  letter-spacing: 0.04em;
+  text-transform: none;
+  font-weight: 500;
+}
+
+.toggle input {
+  appearance: none;
+  width: 34px;
+  height: 18px;
+  margin-top: 0.15em;
+  background: var(--ink-line);
+  border: var(--hair);
+  position: relative;
+  cursor: pointer;
+  transition: background-color var(--dur-fast) var(--ease-out);
+  flex-shrink: 0;
+}
+
+.toggle input::after {
+  content: '';
+  position: absolute;
+  inset: 2px auto 2px 2px;
+  width: 12px;
+  background: var(--paper-mute);
+  transition: transform var(--dur-fast) var(--ease-out), background-color var(--dur-fast) var(--ease-out);
+}
+
+.toggle input:checked { background: color-mix(in oklab, var(--mint) 30%, transparent); }
+.toggle input:checked::after { transform: translate3d(14px, 0, 0); background: var(--mint); }

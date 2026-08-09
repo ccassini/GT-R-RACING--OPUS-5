@@ -1,0 +1,521 @@
+/* ═══════════════════════════════════════════════════════
+   OPEN WORLD — the screens and the HUD for free roam
+
+   Same language as the rest of the game: ink and paper, heavy
+   condensed display type against tiny wide-tracked labels, and the
+   three signal colours meaning what they always mean.
+
+   The one deliberate departure is the roam HUD. A race HUD is a wall
+   of numbers because a race is a wall of numbers; free roam has one
+   question — where am I — so the district name gets display type and
+   everything else stays out of the way.
+   ═══════════════════════════════════════════════════════ */
+
+/* ══ Menu ══════════════════════════════════════════════ */
+
+.navitem--feature .navitem__meta { color: var(--amber); }
+
+/* ══ WORLD SCREEN ══════════════════════════════════════ */
+
+.screen--world,
+.screen--roampause {
+  background: var(--scrim-hard);
+  display: grid;
+  place-items: stretch;
+}
+
+.world,
+.roampause {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  gap: var(--gap-md);
+  padding: var(--edge);
+  height: 100%;
+  overflow: hidden;
+}
+
+.world__body {
+  display: grid;
+  grid-template-columns: minmax(300px, 1.1fr) minmax(280px, 380px);
+  gap: var(--gap-lg);
+  min-height: 0;
+}
+
+.world__scroll {
+  overflow-y: auto;
+  min-height: 0;
+  padding-right: var(--gap-xs);
+  scrollbar-width: thin;
+}
+
+.world__places {
+  display: grid;
+  align-content: start;
+  gap: var(--gap-xs);
+  list-style: none;
+}
+
+.world__side {
+  display: grid;
+  grid-template-rows: auto auto 1fr;
+  gap: var(--gap-sm);
+  min-height: 0;
+}
+
+/* The primary action belongs to the panel, not to the column beside
+   the map. A map sized to the viewport pushes anything under it off a
+   short screen, and "how do I start" must never be below the fold. */
+.world__actions,
+.roampause__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--gap-xs);
+  align-items: center;
+}
+
+.world__actions .btn--primary { flex: 1 1 18rem; }
+.roampause__actions .btn--primary { flex: 0 0 auto; min-width: 12rem; }
+
+.roampause__actions kbd {
+  margin-left: 0.4rem;
+  opacity: 0.75;
+}
+
+/* ── Place cards ── */
+
+.placecard {
+  display: grid;
+  gap: 4px;
+  width: 100%;
+  text-align: left;
+  color: var(--paper);
+  padding: var(--gap-sm) var(--gap-md);
+  background: color-mix(in oklab, var(--ink-raise) 70%, transparent);
+  border: var(--hair);
+  border-left: 4px solid var(--steel);
+  cursor: pointer;
+  transition:
+    border-left-color var(--dur-fast) var(--ease-out),
+    background-color var(--dur-fast) var(--ease-out),
+    transform var(--dur-fast) var(--ease-out);
+}
+
+.placecard:hover { transform: translate3d(4px, 0, 0); }
+
+.placecard.is-selected {
+  border-left-color: var(--amber);
+  background: color-mix(in oklab, var(--amber) 12%, var(--ink-raise));
+}
+
+.placecard__top {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--gap-sm);
+}
+
+.placecard__name {
+  font-family: var(--font-display);
+  font-size: clamp(1.2rem, 0.9rem + 1vw, 1.75rem);
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.placecard__grade {
+  font-family: var(--font-numeric);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  color: var(--amber);
+}
+
+.placecard__meta {
+  font-family: var(--font-numeric);
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--paper-mute);
+}
+
+.placecard__blurb { font-size: 0.82rem; color: var(--paper-dim); max-width: 48ch; }
+
+/* ── The map card ── */
+
+.citymap {
+  border: var(--hair);
+  background: var(--ink-deep);
+  padding: var(--gap-xs);
+  display: grid;
+  gap: var(--gap-xs);
+  min-height: 0;
+}
+
+.citymap__canvas {
+  width: 100%;
+  height: auto;
+  display: block;
+  /* Capped, because a canvas with a fixed aspect ratio inside a grid
+     row that is being compressed does not shrink — it overflows, and
+     lands on top of whatever was meant to sit below it. */
+  max-height: 34vh;
+  max-width: 100%;
+  margin-inline: auto;
+  /* The sea is nearly black at the edges; a hairline keeps the map from
+     bleeding into the panel behind it. */
+  outline: 1px solid color-mix(in oklab, var(--paper) 10%, transparent);
+}
+
+.citymap--large { padding: var(--gap-sm); }
+.citymap--large .citymap__canvas { max-height: 58vh; }
+
+.citymap__meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: var(--gap-xs);
+  font-family: var(--font-numeric);
+  font-size: 0.66rem;
+  font-weight: 600;
+  letter-spacing: var(--track-label);
+  text-transform: uppercase;
+  color: var(--paper-mute);
+}
+
+.citymap__meta .numeric { color: var(--amber); }
+
+/* ── Facts strip ── */
+
+.worldfacts {
+  display: flex;
+  gap: var(--gap-md);
+  flex-wrap: wrap;
+  padding-block: var(--gap-xs);
+  border-block: var(--hair);
+}
+
+.worldfacts--stack { display: grid; grid-template-columns: 1fr 1fr; }
+
+.worldfacts div { display: grid; gap: 2px; }
+
+.worldfacts dt {
+  font-family: var(--font-numeric);
+  font-size: var(--text-label);
+  font-weight: 700;
+  letter-spacing: var(--track-label);
+  color: var(--paper-mute);
+}
+
+.worldfacts dd {
+  font-family: var(--font-numeric);
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--paper);
+}
+
+/* ══ ROAM PAUSE ════════════════════════════════════════ */
+
+.roampause__body {
+  display: grid;
+  grid-template-columns: minmax(320px, 1.4fr) minmax(260px, 340px);
+  gap: var(--gap-lg);
+  min-height: 0;
+}
+
+.roampause__side {
+  display: grid;
+  grid-template-rows: auto auto minmax(0, 1fr);
+  gap: var(--gap-sm);
+  min-height: 0;
+}
+
+.roampause__places {
+  display: grid;
+  align-content: start;
+  gap: 2px;
+  list-style: none;
+  overflow-y: auto;
+  min-height: 0;
+  scrollbar-width: thin;
+}
+
+.travelrow {
+  display: grid;
+  gap: 1px;
+  width: 100%;
+  text-align: left;
+  color: var(--paper);
+  padding: 0.5rem 0.7rem;
+  background: color-mix(in oklab, var(--ink-raise) 55%, transparent);
+  border: 0;
+  border-left: 3px solid transparent;
+  cursor: pointer;
+  transition:
+    border-left-color var(--dur-fast) var(--ease-out),
+    background-color var(--dur-fast) var(--ease-out);
+}
+
+.travelrow:hover,
+.travelrow:focus-visible {
+  border-left-color: var(--amber);
+  background: color-mix(in oklab, var(--amber) 10%, var(--ink-raise));
+}
+
+.travelrow__name {
+  font-family: var(--font-numeric);
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+.travelrow__meta {
+  font-family: var(--font-numeric);
+  font-size: 0.62rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--paper-mute);
+}
+
+/* ══ ROAM HUD ══════════════════════════════════════════ */
+
+.roamhud {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 5;
+  padding: clamp(0.9rem, 0.4rem + 1.6vw, 2.2rem);
+  display: grid;
+  grid-template-columns: 1fr auto;
+  grid-template-rows: auto 1fr auto;
+  grid-template-areas:
+    'place  map'
+    'centre map'
+    'drive  .';
+  gap: var(--gap-sm);
+  font-family: var(--font-numeric);
+}
+
+.roamhud[hidden] { display: none; }
+
+/* ── Where am I ── */
+
+.roamhud__place {
+  grid-area: place;
+  display: grid;
+  gap: 1px;
+  align-content: start;
+  justify-items: start;
+}
+
+.roamhud__district {
+  font-family: var(--font-display);
+  font-size: clamp(1.6rem, 1rem + 2.4vw, 3.2rem);
+  line-height: 0.92;
+  letter-spacing: var(--track-tight);
+  text-transform: uppercase;
+  color: var(--paper);
+  text-shadow: 0 2px 18px oklch(0% 0 0 / 0.7);
+}
+
+.roamhud__label {
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: var(--track-label);
+  text-transform: uppercase;
+  color: var(--paper-dim);
+}
+
+.roamhud__landmark {
+  margin-top: var(--gap-hair);
+  padding: 0.15rem 0.5rem;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ink);
+  background: var(--amber);
+}
+
+.roamhud__landmark[hidden] { display: none; }
+
+/* ── Centre callouts ── */
+
+.roamhud__centre {
+  grid-area: centre;
+  display: grid;
+  align-content: center;
+  justify-items: center;
+  text-align: center;
+  gap: var(--gap-xs);
+}
+
+.roamhud__status {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: var(--track-label);
+  text-transform: uppercase;
+  color: var(--amber);
+  background: var(--scrim-soft);
+  padding: 0.25rem 0.7rem;
+}
+
+.roamhud__status[hidden] { display: none; }
+
+/* ── Map ── */
+
+.roamhud__map {
+  grid-area: map;
+  align-self: start;
+  justify-self: end;
+  display: grid;
+  gap: var(--gap-hair);
+  padding: 6px;
+  background: var(--scrim-soft);
+  border: var(--hair);
+}
+
+.roamhud__minimap {
+  display: block;
+  width: clamp(120px, 8vw + 80px, 200px);
+  height: auto;
+  aspect-ratio: 1;
+}
+
+.roamhud__bearing {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--gap-xs);
+}
+
+.roamhud__compass {
+  font-family: var(--font-display);
+  font-size: 1rem;
+  color: var(--amber);
+  letter-spacing: 0.04em;
+}
+
+.roamhud__coords {
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  color: var(--paper-mute);
+}
+
+/* ── Speed and trip ── */
+
+.roamhud__drive {
+  grid-area: drive;
+  align-self: end;
+  display: grid;
+  gap: var(--gap-xs);
+  justify-items: start;
+}
+
+.roamspeed {
+  display: flex;
+  align-items: baseline;
+  gap: var(--gap-xs);
+}
+
+.roamspeed__value {
+  font-family: var(--font-display);
+  font-size: clamp(3rem, 1.6rem + 5vw, 6.5rem);
+  line-height: 0.82;
+  letter-spacing: var(--track-tight);
+  color: var(--paper);
+  text-shadow: 0 3px 26px oklch(0% 0 0 / 0.75);
+  font-variant-numeric: tabular-nums;
+}
+
+.roamspeed__unit {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: var(--track-label);
+  color: var(--paper-mute);
+}
+
+.roamspeed__gear {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  color: var(--amber);
+  padding-left: var(--gap-xs);
+  border-left: var(--hair);
+}
+
+.roamboost {
+  --fill: 0%;
+  display: flex;
+  align-items: center;
+  gap: var(--gap-xs);
+}
+
+.roamboost__label {
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: var(--track-label);
+  color: var(--paper-mute);
+}
+
+.roamboost__track {
+  display: block;
+  width: clamp(120px, 14vw, 240px);
+  height: 6px;
+  background: color-mix(in oklab, var(--paper) 14%, transparent);
+  position: relative;
+  overflow: hidden;
+}
+
+.roamboost__track::after {
+  content: '';
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: var(--fill);
+  background: var(--steel);
+  transition: width 90ms linear, background-color var(--dur-fast) var(--ease-out);
+}
+
+.roamboost[data-state='ready'] .roamboost__track::after { background: var(--mint); }
+.roamboost[data-state='firing'] .roamboost__track::after { background: var(--coral); }
+
+.roamtrip {
+  display: flex;
+  gap: var(--gap-md);
+}
+
+.roamtrip div { display: grid; gap: 1px; }
+
+.roamtrip dt {
+  font-size: var(--text-label);
+  font-weight: 700;
+  letter-spacing: var(--track-label);
+  color: var(--paper-mute);
+}
+
+.roamtrip dd {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--paper);
+}
+
+/* ══ Narrow screens ════════════════════════════════════ */
+
+@media (max-width: 860px) {
+  .world__body,
+  .roampause__body {
+    grid-template-columns: 1fr;
+    grid-auto-rows: min-content;
+    overflow-y: auto;
+  }
+
+  .world__scroll,
+  .roampause__places { overflow: visible; }
+
+  .roamhud {
+    grid-template-areas:
+      'place  map'
+      'centre centre'
+      'drive  drive';
+  }
+}

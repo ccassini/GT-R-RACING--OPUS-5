@@ -1,0 +1,89 @@
+/* ═══════════════════════════════════════════════════════
+   TOKENS — one place for the whole visual language.
+
+   Direction: motorsport telemetry crossed with print. Heavy
+   condensed display type against tiny wide-tracked labels, ink
+   and paper rather than the usual dark-glass UI, and exactly
+   three signal colours that always mean the same thing:
+     amber = attention / current
+     coral = the player / danger
+     mint  = success / personal best
+   ═══════════════════════════════════════════════════════ */
+
+:root {
+  /* ── Surfaces ── */
+  --ink:        oklch(16% 0.018 260);
+  --ink-deep:   oklch(11% 0.016 262);
+  --ink-raise:  oklch(22% 0.02 258);
+  --ink-line:   oklch(32% 0.02 258);
+  --paper:      oklch(94% 0.012 85);
+  --paper-dim:  oklch(78% 0.012 85);
+  --paper-mute: oklch(62% 0.014 250);
+
+  /* ── Signals ── */
+  --amber:      oklch(80% 0.16 78);
+  --coral:      oklch(66% 0.2 32);
+  --mint:       oklch(82% 0.16 165);
+  --steel:      oklch(58% 0.03 250);
+
+  --gold:       oklch(84% 0.15 88);
+  --silver:     oklch(82% 0.01 250);
+  --bronze:     oklch(66% 0.11 55);
+
+  /* ── Scrims over the 3D scene ── */
+  --scrim-soft: color-mix(in oklab, var(--ink-deep) 62%, transparent);
+  --scrim-hard: color-mix(in oklab, var(--ink-deep) 88%, transparent);
+  --panel:      color-mix(in oklab, var(--ink) 82%, transparent);
+  --panel-edge: color-mix(in oklab, var(--paper) 14%, transparent);
+
+  /* ── Type ──
+     The families come from next/font, which self-hosts them and hands
+     back these variables. The literal names stay as fallbacks so the
+     stylesheet still reads correctly on its own. */
+  --font-display: var(--font-anton), 'Anton', 'Arial Black', system-ui, sans-serif;
+  --font-numeric: var(--font-barlow-condensed), 'Barlow Condensed', 'Arial Narrow', system-ui, sans-serif;
+  --font-ui:      var(--font-barlow), 'Barlow', system-ui, -apple-system, sans-serif;
+
+  /* Capped against viewport height too, so a two-line lockup never
+     pushes the nav and records strip off a short laptop screen. */
+  --text-hero:   min(clamp(2.8rem, 1.2rem + 7.2vw, 9rem), 15vh);
+  --text-xl:     clamp(2.1rem, 1.1rem + 4.2vw, 4.4rem);
+  --text-lg:     clamp(1.5rem, 1rem + 2.2vw, 2.6rem);
+  --text-md:     clamp(1.05rem, 0.9rem + 0.8vw, 1.4rem);
+  --text-sm:     clamp(0.82rem, 0.78rem + 0.2vw, 0.95rem);
+  --text-label:  0.66rem;
+
+  --track-label: 0.22em;
+  --track-tight: -0.015em;
+
+  /* ── Rhythm — deliberately not a uniform scale ── */
+  --gap-hair:   0.25rem;
+  --gap-xs:     0.5rem;
+  --gap-sm:     0.85rem;
+  --gap-md:     1.5rem;
+  --gap-lg:     2.6rem;
+  --gap-xl:     clamp(2.5rem, 1.5rem + 4vw, 6rem);
+  --edge:       clamp(1.25rem, 0.6rem + 2.6vw, 4.5rem);
+
+  /* ── Motion ── */
+  --dur-fast:   140ms;
+  --dur-base:   260ms;
+  --dur-slow:   520ms;
+  --ease-out:   cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+
+  /* ── Depth ── */
+  --lift-1: 0 1px 0 color-mix(in oklab, var(--paper) 8%, transparent);
+  --lift-2: 0 18px 40px -18px oklch(0% 0 0 / 0.75);
+  --lift-3: 0 34px 70px -24px oklch(0% 0 0 / 0.85);
+
+  --hair: 1px solid var(--panel-edge);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --dur-fast: 1ms;
+    --dur-base: 1ms;
+    --dur-slow: 1ms;
+  }
+}
