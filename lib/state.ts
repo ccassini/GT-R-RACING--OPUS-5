@@ -12,6 +12,8 @@
 import { DEFAULT_LAPS, type CameraId, type DifficultyId, type QualityId } from './engine/api';
 
 const STORAGE_KEY = 'sunset-racing.profile.v1';
+/** Bumped when a one-shot setup migration must run (e.g. new default circuit). */
+const PROFILE_REVISION = 2;
 
 export interface Settings {
   quality: QualityId;
@@ -64,6 +66,8 @@ export interface Profile {
   settings: Settings;
   setup: RaceSetup;
   records: Records;
+  /** One-shot migration watermark; absent means pre-revision profiles. */
+  revision?: number;
 }
 
 export type ProfileSection = 'settings' | 'setup' | 'records';
@@ -78,7 +82,7 @@ const DEFAULT_SETTINGS: Settings = {
 };
 
 const DEFAULT_SETUP: RaceSetup = {
-  circuitId: 'sunsetRidge',
+  circuitId: 'portArdente',
   carId: 'comet',
   paintId: 'coral',
   laps: DEFAULT_LAPS,
@@ -112,7 +116,10 @@ function readStored(): Partial<Profile> | null {
 function writeStored(profile: Profile): void {
   if (typeof window === 'undefined') return;
   try {
-    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(profile));
+    window.localStorage.setItem(
+      STORAGE_KEY,
+      JSON.stringify({ ...profile, revision: PROFILE_REVISION }),
+    );
   } catch {
     // Persistence is a nicety here, never a requirement.
   }
@@ -139,6 +146,13 @@ export class GameState {
       bestLap: { ...(stored?.records?.bestLap ?? {}) },
       bestRace: { ...(stored?.records?.bestRace ?? {}) },
     };
+
+    // Rev 2: Port Ardente is the default circuit (attract + Quick Race).
+    const priorRev = stored?.revision ?? 0;
+    if (priorRev < 2) {
+      this.setup = { ...this.setup, circuitId: DEFAULT_SETUP.circuitId };
+      this.persist();
+    }
   }
 
   subscribe = (fn: Listener | (() => void)): (() => void) => {
