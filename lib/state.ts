@@ -13,7 +13,7 @@ import { DEFAULT_LAPS, type CameraId, type DifficultyId, type QualityId } from '
 
 const STORAGE_KEY = 'sunset-racing.profile.v1';
 /** Bumped when a one-shot setup migration must run (e.g. new default circuit). */
-const PROFILE_REVISION = 2;
+const PROFILE_REVISION = 3;
 
 export interface Settings {
   quality: QualityId;
@@ -74,7 +74,7 @@ export type ProfileSection = 'settings' | 'setup' | 'records';
 
 const DEFAULT_SETTINGS: Settings = {
   quality: 'high',
-  camera: 'bird',
+  camera: 'chase',
   masterVolume: 0.8,
   showMinimap: true,
   showGhostLine: false,
@@ -148,9 +148,14 @@ export class GameState {
     };
 
     // Rev 2: Port Ardente is the default circuit (attract + Quick Race).
+    // Rev 3: chase is the default camera (was bird).
     const priorRev = stored?.revision ?? 0;
     if (priorRev < 2) {
       this.setup = { ...this.setup, circuitId: DEFAULT_SETUP.circuitId };
+      this.persist();
+    }
+    if (priorRev < 3) {
+      this.settings = { ...this.settings, camera: DEFAULT_SETTINGS.camera };
       this.persist();
     }
   }
